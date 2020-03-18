@@ -1,10 +1,12 @@
 use std::io;
 use rand::Rng;
 use std::cmp::Ordering;
+use std::collections::HashMap;
 
 extern crate rand;
 
 fn main() {
+    let num = 2..=20;
     println!("------------------------------------");
     println!("enum test");
     enum_test();
@@ -22,19 +24,36 @@ fn main() {
     println!("struct test");
     struct_test();
     println!("------------------------------------");
+    println!("vector test");
+    vec_test();
+    println!("------------------------------------");
+    println!("file read test");
+    read_file();
+    println!("------------------------------------");
+    println!("file write test");
+    write_file();
+    println!("------------------------------------");
+    println!("args test");
+    args_test();
+    println!("------------------------------------");
+    println!("traits test");
+    traits_test();
+    println!("------------------------------------");
+    println!("match test");
+    match_test();
+    println!("------------------------------------");
+    println!("hashmap test");
+    hashmap_test();
+    println!("------------------------------------");
     println!("number guess game");
     guess_num();
     println!("------------------------------------");
 }
 
-fn slice_test() {
-    let s = "hello world";
-    println!("slice of hello world -> {}", &s[0..5]);
-    let s = "沉思";
-    println!("slice of 沉思 -> {}", &s[0..3]);
-    let mut s: [i32; 3] = [1, 2, 3];
-    s[2] = 2;
-    println!("slice length of s -> {}", &s[..].len());
+fn print_num(range: u32) {
+    for i in 1..range {
+        println!("{}", i)
+    }
 }
 
 fn enum_test() {
@@ -54,6 +73,18 @@ fn enum_test() {
         Direction::Right(val) => println!("Direction is {}", val),
     }
 }
+
+fn slice_test() {
+    let s = "hello world";
+    println!("slice of hello world -> {}", &s[0..5]);
+    let s = "沉思";
+    println!("slice of 沉思 -> {}", &s[0..3]);
+    let mut s: [i32; 3] = [1, 2, 3]; //
+    //another array define type :-> let mut s = [2; 400];
+    s[2] = 2;
+    println!("slice length of s -> {}", &s[..].len());
+}
+
 
 fn mut_ref_test() {
     let mut a = 10;
@@ -117,9 +148,113 @@ fn print_struct(c: &Color) {
     println!("Color - R:{} G:{} B:{}", c.red, c.green, c.blue);
 }
 
-fn print_num(range: u32) {
-    for i in 1..range {
-        println!("{}", i)
+fn vec_test() {
+    let mut vec_new: Vec<i32> = Vec::new();
+    vec_new.push(2);
+    let mut vec = vec!["a", "b", "c"];
+    vec.push("s");
+    vec.remove(2);
+    for (index, item) in vec.iter().enumerate() {
+        println!("index {} of vec is {}", index, item);
+    }
+    println!("vec new {}", vec_new[0]);
+}
+
+fn read_file() {
+    use std::fs::File;
+    use std::io::prelude::*;
+    let mut file = File::open(".gitignore").expect("can't open");
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).expect("can't read file");
+    println!("{}", contents);
+}
+
+fn write_file() {
+    use std::fs::File;
+    use std::io::prelude::*;
+    let mut file = File::create("test.txt").expect("could not create");
+    let mut content = String::new();
+    content.push_str("test write file");
+    file.write_all(content.as_bytes()).expect("can't write file");
+}
+
+fn args_test() {
+    use std::env;
+    let args: Vec<String> = env::args().collect();
+    for item in args.iter() {
+        println!("{}", item);
+    }
+}
+
+fn traits_test() {
+    struct Person {
+        name: String,
+        age: i32,
+    }
+    trait Speak {
+        fn speak(&self);
+        fn can_speak(&self) -> bool;
+    }
+    impl Speak for Person {
+        fn speak(&self) {
+            println!("my name is {}", self.name);
+        }
+
+        fn can_speak(&self) -> bool {
+            if self.age > 2 {
+                return true;
+            }
+            return false;
+        }
+    }
+    let bob = Person {
+        name: String::from("bob"),
+        age: 20,
+    };
+    let baby = Person {
+        name: String::from("boby"),
+        age: 1,
+    };
+    println!("Is {} can speak: {}", baby.name, baby.can_speak());
+    bob.speak();
+}
+
+fn match_test() {
+    let number = 20;
+    match number {
+        1 => println!("equal one"),
+        //重点 三个点
+        2...10 => println!("greater than one"),
+        11 | 12 => println!("equal eleven or twelve"),
+        _ => println!("unknown")
+    }
+}
+
+fn hashmap_test() {
+    let mut map: HashMap<&str, &str> = HashMap::with_capacity(20);
+    map.insert("a", "b");
+    println!("key {} equal {}", "a", map.get("a").expect(""));
+    map.insert("a", "c");
+    println!("key {} equal {}", "a", map.get("a").expect(""));
+    map.insert("b", "b");
+    map.insert("c", "b");
+    println!("map size is {} and capacity is {}", map.len(), map.capacity());
+    map.shrink_to_fit();
+    println!("map size is {} and capacity is {}", map.len(), map.capacity());
+    match map.get("b") {
+        Some(s) => println!("b value is {}", s),
+        None => println!("can't find key in map")
+    }
+    println!("print by reference");
+    for (k, v) in &map {
+        println!("key {} equal {}", k, v);
+    }
+    for (_, v) in map.iter_mut() {
+        *v = "s"
+    }
+    println!("print by iter after values mut");
+    for (k, v) in map.iter() {
+        println!("key {} equal {}", k, v);
     }
 }
 
